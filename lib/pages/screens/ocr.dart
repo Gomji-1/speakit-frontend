@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'tts.dart';
-import 'dart:async'; // This provides TimeoutException
+import 'dart:async';
 
 class OcrPage extends StatefulWidget {
   final String imagePath;
@@ -24,9 +24,7 @@ class _OcrPageState extends State<OcrPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sendImageToServer();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sendImageToServer());
   }
 
   @override
@@ -44,16 +42,15 @@ class _OcrPageState extends State<OcrPage> {
     });
 
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://54.179.204.181:5000/ocr'),
-      );
-
-      // Pre-cache the image file to ensure it's available
       final file = File(widget.imagePath);
       if (!await file.exists()) {
         throw FileSystemException('Image file not found');
       }
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://54.179.204.181:5000/ocr'),
+      );
 
       request.files.add(
         await http.MultipartFile.fromPath(
@@ -81,7 +78,7 @@ class _OcrPageState extends State<OcrPage> {
       } else {
         throw http.ClientException(
           'Server error: ${response.statusCode}',
-          Uri.parse('http://192.168.1.5:5000/ocr'),
+          Uri.parse('http://54.179.204.181:5000/ocr'),
         );
       }
     } on TimeoutException catch (e) {
@@ -90,10 +87,6 @@ class _OcrPageState extends State<OcrPage> {
       _handleError('Network error: ${e.message}');
     } on http.ClientException catch (e) {
       _handleError('Connection error: ${e.message}');
-    } on FormatException catch (e) {
-      _handleError('Data format error: ${e.message}');
-    } on FileSystemException catch (e) {
-      _handleError('File error: ${e.message}');
     } catch (e) {
       _handleError('Unexpected error: ${e.toString()}');
     } finally {
@@ -111,7 +104,6 @@ class _OcrPageState extends State<OcrPage> {
         content: Text(message),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 4),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -140,6 +132,86 @@ class _OcrPageState extends State<OcrPage> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xffF0F2F5),
+      appBar: AppBar(
+        title: const Text(
+          'OCR Result',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildInfoNote(),
+                  const SizedBox(height: 16),
+                  _ImagePreview(imagePath: widget.imagePath),
+                  const SizedBox(height: 20),
+                  _buildTextField(),
+                  if (_hasError) _buildRetryButton(),
+                  const SizedBox(height: 20),
+                  _buildLanguageSelector(),
+                  const SizedBox(height: 20),
+                  _buildVoiceSelector(),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+      floatingActionButton: _isLoading || _hasError ? null : _buildNextButton(),
+    );
+  }
+
+  Widget _buildInfoNote() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xffE3F2FD),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Color(0xff1976D2)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Scroll down to select language and voice',
+              style: TextStyle(color: Colors.grey[800]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField() {
+    return TextField(
+      controller: _textController,
+      maxLines: 10,
+      minLines: 5,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        labelText: 'Extracted Text',
+        fillColor: Colors.white,
+        filled: true,
+      ),
+    );
+  }
+
   Widget _buildLanguageSelector() {
     return _SelectionCard(
       title: 'Select Language',
@@ -161,10 +233,7 @@ class _OcrPageState extends State<OcrPage> {
   Widget _buildNextButton() {
     return FloatingActionButton.extended(
       onPressed: _navigateToTtsPage,
-      label: const Text(
-        'Next',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
+      label: const Text('Next'),
       icon: const Icon(Icons.arrow_forward),
       backgroundColor: const Color(0xff4CAF50),
     );
@@ -177,99 +246,7 @@ class _OcrPageState extends State<OcrPage> {
       label: const Text('Retry'),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xff4CAF50),
-        foregroundColor: Colors.white,
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF0F2F5),
-      appBar: AppBar(
-        title: const Text(
-          'OCR Result',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0.0,
-        centerTitle: true,
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xff4CAF50),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Friendly reminder note
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xffBBDEFB)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline,
-                            color: Color(0xff1976D2)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Scroll down to select language and voice',
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Image Preview
-                  _ImagePreview(imagePath: widget.imagePath),
-                  const SizedBox(height: 20),
-
-                  // Extracted Text Field
-                  TextField(
-                    controller: _textController,
-                    maxLines: 10,
-                    minLines: 5,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      labelText: 'Extracted Text',
-                      fillColor: Colors.white,
-                      filled: true,
-                    ),
-                    readOnly: false,
-                  ),
-
-                  if (_hasError) ...[
-                    const SizedBox(height: 20),
-                    _buildRetryButton(),
-                  ],
-
-                  const SizedBox(height: 20),
-                  _buildLanguageSelector(),
-                  const SizedBox(height: 20),
-                  _buildVoiceSelector(),
-                  const SizedBox(height: 80), // Space for FAB
-                ],
-              ),
-            ),
-      floatingActionButton: _isLoading || _hasError ? null : _buildNextButton(),
     );
   }
 }
@@ -292,7 +269,6 @@ class _ImagePreview extends StatelessWidget {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 10,
-                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -324,9 +300,7 @@ class _PlaceholderWidget extends StatelessWidget {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Center(
-        child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
-      ),
+      child: const Center(child: Icon(Icons.broken_image)),
     );
   }
 }
@@ -348,38 +322,24 @@ class _SelectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xffEDEDED),
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             DropdownButton<String>(
               value: value,
               isExpanded: true,
-              dropdownColor: const Color(0xffEDEDED),
               items: items
                   .map((item) => DropdownMenuItem(
                         value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(color: Colors.black),
-                        ),
+                        child: Text(item),
                       ))
                   .toList(),
               onChanged: onChanged,
