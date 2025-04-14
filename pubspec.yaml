@@ -1,0 +1,73 @@
+name: frontend
+description: "A new Flutter project."
+publish_to: 'none' # Prevents accidental publishing to pub.dev
+
+# Version and build number for your application
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.1
+
+# Dependencies for your project
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Commonly used packages
+  cupertino_icons: ^1.0.8      # iOS-style icons
+  image_picker: ^1.1.2         # For selecting images
+  http: ^1.3.0                 # For API requests
+  audioplayers: ^6.4.0         # For audio playback
+  path_provider: ^2.1.5        # For accessing file storage
+  connectivity_plus: ^6.1.3
+  share_plus: ^10.1.4
+  lottie: ^3.3.1
+  url_launcher: ^6.3.1
+  flutter_svg: ^2.0.17
+  path: ^1.9.0
+  permission_handler: ^11.4.0
+  image: ^4.5.4
+  image_cropper: ^9.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter               # Testing framework
+  flutter_lints: ^5.0.0        # Enforces best coding practices
+  flutter_launcher_icons: 0.13.1 # Icon generation tool
+
+flutter:
+
+  # Ensures Material Icons are included
+  uses-material-design: true
+
+  # Assets section for icons, images, etc.
+  assets:
+    - assets/icons/
+    - assets/images/
+    - assets/lottie/welcome_animation.json
+    - assets/images/paytm_qr.png
+    - assets/icons/instagram.svg
+    - assets/icons/linkedin.svg
+
+  # Custom fonts for your application
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: fonts/Poppins-Regular.ttf
+          weight: 400 
+        - asset: fonts/Poppins-SemiBold.ttf
+          weight: 600
+
+# Configuration for flutter_launcher_icons
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+
