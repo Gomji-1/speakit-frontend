@@ -6,7 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
-import 'home.dart'; // Replace with your actual package name
+import 'home.dart';
 
 class TtsPage extends StatefulWidget {
   final String imagePath;
