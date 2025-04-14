@@ -1,25 +1,26 @@
-# SpeakIt  
+# SpeakIt
 
-A Flutter app that converts text from images into downloadable MP3 audio using OCR and TTS.  
+A Flutter app that converts text from images into downloadable MP3 audio using OCR and TTS.
 
-## Features  
+## Features
+- Extract text from images (OCR)
+- Convert text to natural-sounding speech (TTS)
+- Download audio as MP3 for offline use
+- Simple and intuitive interface
 
-- Extract text from images (OCR)  
-- Convert text to natural-sounding speech (TTS)  
-- Download audio as MP3 for offline use  
-- Simple and intuitive interface  
+## Setup
+- Ensure Flutter is installed (official guide)
+- Clone this repository
+- Run `flutter pub get`
+- Launch with `flutter run`
 
-## Setup  
+## Download APK
+You can download the APK for **SpeakIt** here:  
+[Download SpeakIt APK](https://github.com/Gomji-1/speakit-frontend/releases/download/v1.0.0/SpeakIt_v1.apk)
 
-1. Ensure Flutter is installed ([official guide](https://flutter.dev/docs/get-started/install))  
-2. Clone this repository  
-3. Run `flutter pub get`  
-4. Launch with `flutter run`  
+## Support
+Email: gomji.feedback@gmail.com
 
-## Support  
+v1.0.0 | Built with Flutter
 
-Email: [gomji.feedback@gmail.com](mailto:gomji.feedback@gmail.com)  
-
----  
-
-`v1.0.0` | Built with Flutter  
+Developer: Gomji
