@@ -1,0 +1,53 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.frontend"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        applicationId = "com.example.frontend"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        multiDexEnabled true  // ADDED FOR UCROP SUPPORT
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+            
+            // 🔥 Custom APK Name Configuration
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "SpeakIt_v1.apk"
+                }
+            }
+        }
+    }
+}
+
+// ADD THESE DEPENDENCIES (AT THE END, BEFORE FLUTTER BLOCK)
+dependencies {
+    implementation "androidx.exifinterface:exifinterface:1.3.6"
+    implementation "com.github.yalantis:ucrop:2.2.8"
+    implementation "androidx.multidex:multidex:2.0.1"
+}
+
+flutter {
+    source = "../.."
+}
